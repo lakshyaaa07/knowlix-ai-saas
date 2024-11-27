@@ -1,3 +1,10 @@
+# Status:
+
+## `🚧 Under Construction 🚧`
+This project is actively being developed. Expect frequent updates and new features as we build out the full collaborative experience.
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
