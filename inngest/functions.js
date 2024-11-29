@@ -61,7 +61,7 @@ export const generateNotes = inngest.createFunction(
       const Chapters = course?.courseLayout?.chapters || [];
       let index = 0;
       Chapters.forEach(async(chapter) => {
-        const PROMPT = `Generate study preparation material for the provided chapters. Each chapter should include comprehensive content based on its title and difficulty level. Make sure to address all relevant topics thoroughly, structured for effective study. Make sure generated content should be in valid HTML format strictly (Do not include <html>, <head>, <body>, or <title> tags). The chapters data is: ${JSON.stringify(chapter)}`;
+        const PROMPT = `Generate structured and detailed study material for the provided chapter in valid HTML format (without <html>, <head>, <title>, or <body> tags). Each chapter should include: A brief introduction to the topic, clear headings and subheadings for organization, detailed explanations with examples and code blocks (if applicable), key takeaways or summary at the end, and properly formatted code blocks for easy readability. Ensure the content is clean, readable, and visually engaging, similar to professional documentation sites like MDN or React Docs. The chapter details are: ${JSON.stringify(chapter)}`;
         const result = await generateNotesAiModel.sendMessage(PROMPT);
         const aiResp = result.response.text();
 
