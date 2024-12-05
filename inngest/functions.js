@@ -1,8 +1,8 @@
 import { db } from "@/configs/db";
 import { inngest } from "./client";
-import { CHAPTER_NOTES_TABLE, STUDY_MATERIAL_TABLE, USER_TABLE } from "@/configs/schema";
+import { CHAPTER_NOTES_TABLE, STUDY_MATERIAL_TABLE, STUDY_TYPE_CONTENT_TABLE, USER_TABLE } from "@/configs/schema";
 import { eq } from "drizzle-orm";
-import { generateNotesAiModel } from "@/configs/AiModel";
+import { generateNotesAiModel, generatStudyTypeContentAiModel } from "@/configs/AiModel";
 
 export const helloWorld = inngest.createFunction(
   { id: "hello-world" },
@@ -51,8 +51,8 @@ export const  createNewUser = inngest.createFunction(
 
 
 export const generateNotes = inngest.createFunction(
-  { id: 'generate-course'},
-  { event: 'notes.generate'},
+  { id: 'generate-course' },
+  { event: 'notes.generate' },
   async ({ event, step }) => {
     const { course } = event.data;
 
@@ -60,21 +60,49 @@ export const generateNotes = inngest.createFunction(
     const notesResult = await step.run('Generate Notes for each chapter', async () => {
       const Chapters = course?.courseLayout?.chapters || [];
       let index = 0;
-      Chapters.forEach(async(chapter) => {
-        const PROMPT = `Generate structured and detailed study material for the provided chapter in valid HTML format (without <html>, <head>, <title>, or <body> tags). Each chapter should include: A brief introduction to the topic, clear headings and subheadings for organization, detailed explanations with examples and code blocks (if applicable), key takeaways or summary at the end, and properly formatted code blocks for easy readability. Ensure the content is clean, readable, and visually engaging, similar to professional documentation sites like MDN or React Docs. The chapter details are: ${JSON.stringify(chapter)}`;
-        const result = await generateNotesAiModel.sendMessage(PROMPT);
-        const aiResp = result.response.text();
 
+      for (const chapter of Chapters) {
+        const PROMPT = `
+          Generate detailed study material for the provided chapter. 
+          - The output should ONLY be in plain HTML format
+          - Exclude <html>, <head>, <title>, or <body> tags.
+          - Content structure:
+            1. Brief introduction to the topic.
+            2. Clear headings and subheadings with relatable emoji for each chapter title to look it more like GenZ (like Notion).
+            3. Detailed explanations with examples and properly formatted code blocks (<pre><code>).
+            4. Key takeaways or summary at the end.
+          - Follow the style of professional documentation (e.g., MDN or React Docs).
+
+          Chapter Information:
+          Title: ${chapter.chapter_title}
+          Summary: ${chapter.chapter_summary}
+          Content Topics: ${JSON.stringify(chapter.topics || [])}
+        `;
+
+
+
+        const result = await generateNotesAiModel.sendMessage(PROMPT);
+        const aiResp = await result.response.text();
+
+        // Ensure the response is clean and contains no <html>, <head>, <title>, or <body> tags
+        const sanitizedHtml = aiResp
+          .replace(/<html.*?>|<\/html>/g, '')  // Remove <html> and </html>
+          .replace(/<head.*?>.*?<\/head>/gs, '') // Remove <head>...</head>
+          .replace(/<title.*?>.*?<\/title>/gs, '') // Remove <title>...</title>
+          .replace(/<body.*?>|<\/body>/g, '')  // Remove <body> and </body>;
+
+        // Insert the sanitized content into the database
         await db.insert(CHAPTER_NOTES_TABLE).values({
           chapterId: index,
           courseId: course?.courseId,
-          notes: aiResp,
-        })
-        index = index + 1;
-      });
+          notes: sanitizedHtml.trim(), // Store the sanitized HTML
+        });
+
+        index++;
+      }
 
       return 'Success';
-    })
+    });
 
     // Update Status to 'Ready' 
     const updateCourseStatusResult = await step.run('Update Course Status to Ready', async () => {
@@ -83,5 +111,33 @@ export const generateNotes = inngest.createFunction(
       }).where(eq(STUDY_MATERIAL_TABLE.courseId, course?.courseId));
       return 'Success';
     });
+  }
+)
+
+// Used to generate FlashCard, Quiz, and other study materials
+export const generateStudyTypeContent = inngest.createFunction(
+  { id: 'generate-study-type-content' },
+  { event: 'studyType.content' },
+
+  async({event, step})=>{
+    const {studyType, prompt, courseId, recordId} = event.data;
+
+    const flashCardAIResult = await step.run('Generating Flashcard using AI', async()=>{
+      const result = await generatStudyTypeContentAiModel.sendMessage(prompt);
+      const AIResult = JSON.parse(result.response.text());
+      return AIResult;
+    });
+
+    // Save the result to the database
+
+    const dbResult = await step.run('Save result to database', async()=>{
+      const result = await db.update(STUDY_TYPE_CONTENT_TABLE)
+      .set({
+        content: flashCardAIResult,
+      }).where(eq(STUDY_TYPE_CONTENT_TABLE.id, recordId));
+      
+
+      return 'Data Inserted';
+    })
   }
 )

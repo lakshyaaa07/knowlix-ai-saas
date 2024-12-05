@@ -1,8 +1,33 @@
 import { Button } from '@/components/ui/button'
+import { generatStudyTypeContentAiModel } from '@/configs/AiModel'
+import axios from 'axios'
+import { RefreshCcw } from 'lucide-react'
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 
-function MaterialCardItem({item, studyTypeContent}) {
+function MaterialCardItem({item, studyTypeContent, course, refreshData}) {
+
+  const [loading, setLoading] = useState(false);
+  
+  const generateContent = async () => {
+    setLoading(true);
+    console.log(course)
+    let chapters ='';
+    course.courseLayout.chapters.forEach((chapter)=>{  
+      chapters=(chapter.chapter_title || chapter?.chapterTitle)+ ',' + chapters;
+
+    });
+    // console.log(chapters);
+    const result = await axios.post('/api/study-type-content', {
+      courseId: course?.courseId,
+      type:item.name,
+      chapters: chapters
+    });
+    setLoading(false);
+    console.log(result);
+    refreshData(true);
+  }
+
   return (
     <div className={`border shadow-md rounded-lg p-5 flex flex-col items-center
                 ${studyTypeContent?.[item.type]?.length == null && 'grayscale'}
@@ -16,7 +41,9 @@ function MaterialCardItem({item, studyTypeContent}) {
         <p className='text-gray-400 text-sm text-center'>{item.desc}</p>
 
         {studyTypeContent?.[item.type]?.length == null
-        ? <Button className='mt-3 w-full' variant='outline'>Generate</Button>
+        ? <Button className='mt-3 w-full' variant='outline' onClick={()=>generateContent()}>
+          {loading&& <RefreshCcw className='animate-spin'/>}
+          Generate</Button>
         : <Button className='mt-3 w-full' variant='outline'>View</Button>
         }
     </div>
