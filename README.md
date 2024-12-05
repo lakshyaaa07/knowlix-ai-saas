@@ -2,6 +2,7 @@
 
 ## `🚧 Under Construction 🚧`
 This project is actively being developed. Expect frequent updates and new features as we build out the full collaborative experience.
+### `💻 It will be deployed once completed!!`
 
 
 
