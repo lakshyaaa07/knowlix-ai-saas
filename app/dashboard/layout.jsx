@@ -3,8 +3,12 @@ import React, { useState } from "react";
 import DashboardHeader from "./_components/DashboardHeader";
 import SideBar from "./_components/SideBar";
 import { Menu } from "lucide-react";
+import { CourseCountContext } from "../_context/CourseCountContext";
 
 function DashboardLayout({ children }) {
+
+  const [totalCourse, setTotalCourse] = useState(0);  
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -12,6 +16,7 @@ function DashboardLayout({ children }) {
   };
 
   return (
+    <CourseCountContext.Provider value={{totalCourse, setTotalCourse}}>
     <div>
       {/* Sidebar */}
       <div
@@ -44,6 +49,7 @@ function DashboardLayout({ children }) {
         <div className="p-10">{children}</div>
       </div>
     </div>
+    </CourseCountContext.Provider>
   );
 }
 
