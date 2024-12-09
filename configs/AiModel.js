@@ -82,6 +82,23 @@ const {
       ],
     });
   
+    export const generateQuizAiModel = model.startChat({
+      generationConfig,
+      history: [
+        {
+          role: "user",
+          parts: [
+            {text: "Generate Quiz on topic : Flutter Fundamentals, User Interface (UI) Development, Basic App Navigation with Question and Options along with correct answer in JSON format, (Max 10)\n\n"},
+          ],
+        },
+        {
+          role: "model",
+          parts: [
+            {text: "```json\n{\n  \"quizTitle\": \"Flutter Fundamentals & UI Quiz\",\n  \"questions\": [\n    {\n      \"question\": \"What is the primary language used for building Flutter applications?\",\n      \"options\": [\"Java\", \"Kotlin\", \"Dart\", \"Swift\"],\n      \"answer\": \"Dart\"\n    },\n    {\n      \"question\": \"Which widget is the root of most Flutter UI hierarchies?\",\n      \"options\": [\"Container\", \"Row\", \"Column\", \"MaterialApp\"],\n      \"answer\": \"MaterialApp\"\n    },\n    {\n      \"question\": \"What is the purpose of a StatefulWidget in Flutter?\",\n      \"options\": [\"To create static UI elements\", \"To create UI elements that change over time\", \"To manage application state globally\", \"To handle user input\"],\n      \"answer\": \"To create UI elements that change over time\"\n    },\n    {\n      \"question\": \"Which widget is used to arrange children horizontally?\",\n      \"options\": [\"Column\", \"Row\", \"Stack\", \"Container\"],\n      \"answer\": \"Row\"\n    },\n    {\n      \"question\": \"How do you navigate to a new route in Flutter?\",\n      \"options\": [\"`Navigator.pushNamed()`\", \"`Navigator.pop()`\", \"`setState()`\", \"`runApp()`\"],\n      \"answer\": \"`Navigator.pushNamed()`\"\n    },\n    {\n      \"question\": \"What widget is used to display text in Flutter?\",\n      \"options\": [\"`Text()`\", \"`Image()`\", \"`Icon()`\", \"`Button()`\"],\n      \"answer\": \"`Text()`\"\n    },\n    {\n      \"question\": \"What does the `BuildContext` provide in Flutter?\",\n      \"options\": [\"App's theme data\", \"Access to the widget tree\", \"User's location\", \"Network connectivity status\"],\n      \"answer\": \"Access to the widget tree\"\n    },\n    {\n      \"question\": \"What is the purpose of a `StatelessWidget` in Flutter?\",\n      \"options\": [\"To manage app state\", \"To create UI that doesn't change\", \"To handle user input\", \"To perform background tasks\"],\n      \"answer\": \"To create UI that doesn't change\"\n    },\n     {\n      \"question\": \"Which widget is best suited for displaying a list of items that can be scrolled?\",\n      \"options\": [\"`Row`\", \"`Column`\", \"`ListView`\", \"`Stack`\"],\n      \"answer\": \"`ListView`\"\n    },\n    {\n      \"question\": \"Which method is used to remove the current route from the navigation stack?\",\n      \"options\": [\"`Navigator.push()`\", \"`Navigator.pushNamed()`\", \"`Navigator.pop()`\", \"`Navigator.removeRoute()`\"],\n      \"answer\": \"`Navigator.pop()`\"\n    }\n  ]\n}\n```\n"},
+          ],
+        },
+      ],
+    });
     // const result = await chatSession.sendMessage("INSERT_INPUT_HERE");
     // console.log(result.response.text());
   
